@@ -7,12 +7,18 @@ var game = {
 	correct: 0,
 	incorrect: 0,
 	questionTimer: 45,
-	postAnswerTimeOut: 5,
+	postAnswerTimeOut: 10000,
 	currentQuestion: "",
 	correctAns: "",
+	incorrect1: "",
+	incorrect2: "",
+	incorrect3: "",
 	possAns: [],
 	possAnsLength: "",
 	questionsUsed: [],
+	interval: 0,
+	click: "",
+	clickRecording: false,
 
 	// array of 10 questions and answers
 	questions: [{
@@ -34,7 +40,7 @@ var game = {
 			wrongans1: "because they're black in color",
 			wrongans2: "because everything they suck in just mixes up into 'black' matter",
 			wrongans3: "because it sounds cool and less threatening that 'end-of-reality' hole",
-			rightans: "they're actually the brightest objects in space but their light just reaches our eyes because of their immense gravity"
+			rightans: "they're actually the brightest objects in space but their light never reaches our eyes because of their own immense gravity"
 		},
 		{
 			ques: "What is light exatly?",
@@ -91,44 +97,115 @@ var game = {
 		generateQuestion: function() {
 			var index = Math.floor((Math.random() * 9)+0.99);
 			this.currentQuestion = game.questions[index].ques;
-			game.correctAns = game.questions[index].rightans;
-			var incorrect1 = game.questions[index].wrongans1;
-			var incorrect2 = game.questions[index].wrongans2;
-			var incorrect3 = game.questions[index].wrongans3;
-			this.possAns = [game.correctAns, incorrect1, incorrect2, incorrect3];
+			this.correctAns = game.questions[index].rightans;
+			this.incorrect1 = game.questions[index].wrongans1;
+			this.incorrect2 = game.questions[index].wrongans2;
+			this.incorrect3 = game.questions[index].wrongans3;
+			this.possAns = [game.correctAns, game.incorrect1, game.incorrect2, game.incorrect3];
 			game.possAnsLength = this.possAns.length;
 			this.questionsUsed.push(this.questions.splice(index,1));
 		},
 
+		generateAnswers: function() {
+			for(i=game.possAnsLength;i>0;i--){
+				var index = Math.floor((Math.random() * i));
+				// console.log(index);
+				// console.log(game.possAns);
+				var answerDiv = $("<div>");
+				answerDiv.addClass("answerDiv");
+				answerDiv.text(game.possAns[index]);
+				$("#questionDiv").append(answerDiv);
+				game.possAns.splice(index,1);
+				game.possAnsLength = game.possAns.length;
+			}
+		},
+
 		countDown: function() {
 			game.questionTimer--;
+			$("#timer").html("Time left: " + game.questionTimer + " seconds");
+		},
+
+		postQuestionScreen: function() {
+			// set delay before changing screen
+			var answerDelay = setTimeout(function(){
+				game.clickRecording = false;
+				game.reset();
+				$(".answerDiv").css("display","block");
+			},game.postAnswerTimeOut)
+		},
+
+		reset: function() {
+			if(game.questionsUsed.length !== 10){
+				// not gone through all questions so reset timer, generate another question, and setup answers
+				$("#timer").text("Time left: 45 seconds");
+				this.generateQuestion();
+				$("#questionDiv").text(game.currentQuestion);
+				this.generateAnswers();
+				this.questionTimer = 45;
+				this.interval = setInterval(this.countDown,1000);
+			} else if (game.questionsUsed.length >= 10){
+				// show wins and losses and ask if they want to play again
+				// code for showing wins
+				// code for showing losses
+			}
 		}
 	}
 
-$("#start").click(function(){
-	// dynamically create divs for question and answers
-	var questionDiv = $("<div>");
-	questionDiv.attr("id","questionDiv");
-	// hide the stuff inside the jumbotron I don't want to show
-	$("p, hr, div.row").css("display", "none");
-	// generate question and place inside div created above
-	game.generateQuestion();
-	questionDiv.text(game.currentQuestion);
-	$("div.jumbotron").append(questionDiv);
-	// append answers in random order to questionDiv just created
-	for(i=game.possAnsLength;i>0;i--){
-		var index = Math.floor((Math.random() * i));
-		console.log(index);
-		console.log(game.possAns);
-		var answerDiv = $("<div>");
-		answerDiv.attr("id", "answerDiv"+index);
-		answerDiv.text(game.possAns[index]);
-		$("#questionDiv").append(answerDiv);
-		game.possAns.splice(index,1);
-		game.possAnsLength = game.possAns.length;
-	}
-
-})
-
+	$("#start").click(function(){
+		// dynamically create divs for question and answers
+		var questionDiv = $("<div>");
+		questionDiv.attr("id","questionDiv");
+		// hide the stuff inside the jumbotron I don't want to show
+		$("p, hr, div.row").css("display", "none");
+		// generate question and place inside div created above
+		game.generateQuestion();
+		questionDiv.text(game.currentQuestion);
+		// generate place for timer
+		var timer = $("<div>");
+		timer.attr("id","timer");
+		timer.addClass("text-center");
+		timer.text("Time left: 45 seconds")
+		$("div.jumbotron").append(timer);
+		// append questions below timer
+		$("div.jumbotron").append(questionDiv);
+		// append answers in random order to questionDiv just created
+		game.generateAnswers();
+		// create timer div and 
+		if(!game.clickRecording){
+			game.interval = setInterval(game.countDown,1000);
+		}
+	})
+	// record users click to check for if correct or incorrect answer chosen
+	$(window).click(function(event){
+		if(!game.clickRecording){
+			console.log(game.clickRecording);
+			game.click = event.target.innerHTML;
+			// if correct answer chosen increase correct counter by 1 and show postAnswer screen stuff 
+			if(game.click === game.correctAns){
+				$(".answerDiv").css("display", "none");
+				var postAnswer = $("<div>");
+				postAnswer.addClass("postAnswer");
+				postAnswer.addClass("text-center");
+				postAnswer.html("<p>correct!</p>")
+				$("#questionDiv").append(postAnswer);
+				game.correct++;
+				clearInterval(game.interval);
+				console.log("correct!");
+				game.clickRecording = true;
+				game.postQuestionScreen();
+			} else if(game.click === game.incorrect1 || game.click === game.incorrect2 || game.click === game.incorrect3){
+				$(".answerDiv").css("display", "none");
+				var postAnswer = $("<div>");
+				postAnswer.addClass("postAnswer");
+				postAnswer.addClass("text-center");
+				postAnswer.html("<p>wrong!</p>")
+				$("#questionDiv").append(postAnswer);
+				clearInterval(game.interval);
+				game.incorrect++;
+				game.clickRecording = true;
+				game.postQuestionScreen();
+			}
+		}
+	})
 }
 
