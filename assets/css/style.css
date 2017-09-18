@@ -1,3 +1,35 @@
+body {
+	background: url("../images/lightBackground.jpg");
+}
+
 .jumbotron {
 	margin-top: 2em;
+}
+
+#questionDiv {
+	margin-top:2em;
+	font-size:20px;
+	font-family: 'Quicksand', sans-serif;
+}
+
+.answerDiv {
+	box-sizing: border-box;
+	margin: 1em 0 0 1em;
+	padding: 3px;
+	font-family: 'Quicksand', sans-serif;;
+}
+
+.answerHover {
+	border: 1px solid black;
+}
+
+.postAnswer {
+	margin-top: 2em;
+	font-size:20px;
+	font-family: 'Quicksand', sans-serif;
+}
+
+#timer {
+	margin-top: 2em;
+	font-size: 30px;
 }

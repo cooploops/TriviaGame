@@ -1,13 +1,10 @@
-window.onload = function() {
-
-
-
+window.onload = function(){
 var game = {
 	// timers and counters
 	correct: 0,
 	incorrect: 0,
 	questionTimer: 45,
-	postAnswerTimeOut: 10000,
+	postAnswerTimeOut: 7000,
 	currentQuestion: "",
 	correctAns: "",
 	incorrect1: "",
@@ -24,7 +21,7 @@ var game = {
 	questions: [{
 			ques: "Why is the sky blue?",
 			wrongans1: "because the ocean reflects the the color of blue into the sky",
-			wwrongans2: "because that's just how Earth's sky is",
+			wrongans2: "because that's just how Earth's sky is",
 			wrongans3: "because it has something to do with light",
 			rightans: "because of Rayleigh Scattering"
 		},
@@ -43,7 +40,7 @@ var game = {
 			rightans: "they're actually the brightest objects in space but their light never reaches our eyes because of their own immense gravity"
 		},
 		{
-			ques: "What is light exatly?",
+			ques: "What is light?",
 			wrongans1: "it's just light",
 			wrongans2: "it's a wavelength on the electromagnetic spectrum",
 			wrongans3: "it's a a super tiny particle we can't see",
@@ -73,16 +70,16 @@ var game = {
 		{
 			ques: "How long does light take to get from the sun to the earth",
 			wrongans1: "instantly",
-			wrongans2: " about 3 minutes",
-			wrongans3: "about 1 hour",
-			rightans: "about 10 minutes"
+			wrongans2: "between 3 to 5 minutes",
+			wrongans3: "about 5 seconds",
+			rightans: "between 8 to 10 minutes"
 		},
 		{
-			ques: "What is a radio wave?",
-			wrongans1: "it's a sound wave made by radio stations",
+			ques: "What are radio waves?",
+			wrongans1: "they're sound waves made by radio stations",
 			wrongans2: "tiny reverberations in the air that we use antennae to receive and intensify the signal so we can listen",
-			wrongans3: "electricty that we shoot from antennae to antennae",
-			rightans: "they're electro-magnetic waves that travel in all directions"
+			wrongans3: "they're electricty that we shoot from antennae to antennae",
+			rightans: "they're electromagnetic waves that travel in all directions"
 		},
 		{
 			ques: "what makes fiber optic wires so fast?",
@@ -95,7 +92,8 @@ var game = {
 
 		// functions to call
 		generateQuestion: function() {
-			var index = Math.floor((Math.random() * 9)+0.99);
+			var index = Math.floor((Math.random() * (game.questions.length-1))+0.99);
+			console.log(index);
 			this.currentQuestion = game.questions[index].ques;
 			this.correctAns = game.questions[index].rightans;
 			this.incorrect1 = game.questions[index].wrongans1;
@@ -123,6 +121,18 @@ var game = {
 		countDown: function() {
 			game.questionTimer--;
 			$("#timer").html("Time left: " + game.questionTimer + " seconds");
+				if (game.questionTimer <= 0){
+					$(".answerDiv").css("display", "none");
+					var postAnswer = $("<div>");
+					postAnswer.addClass("postAnswer");
+					postAnswer.addClass("text-center");
+					postAnswer.html("<p>You're out of time! The correct answer is " + game.correctAns + "</p>")
+					$("#questionDiv").append(postAnswer);
+					clearInterval(game.interval);
+					game.incorrect++;
+					game.clickRecording = true;
+					game.postQuestionScreen();
+				}
 		},
 
 		postQuestionScreen: function() {
@@ -135,7 +145,7 @@ var game = {
 		},
 
 		reset: function() {
-			if(game.questionsUsed.length !== 10){
+			if(game.questionsUsed.length < 10){
 				// not gone through all questions so reset timer, generate another question, and setup answers
 				$("#timer").text("Time left: 45 seconds");
 				this.generateQuestion();
@@ -145,67 +155,77 @@ var game = {
 				this.interval = setInterval(this.countDown,1000);
 			} else if (game.questionsUsed.length >= 10){
 				// show wins and losses and ask if they want to play again
-				// code for showing wins
-				// code for showing losses
+				$("#questionDiv").css("display","none");
+				var results = $("<div>");
+				results.html("<p class='lead'>Here are your results! Feel free to play again if you'd like by refreshing the page!</p> <br> <span>correct: " + game.correct + "</span> <br> <span>incorrect: " + game.incorrect + "</span>")
+				$("div.jumbotron").append(results);
 			}
 		}
-	}
-
-	$("#start").click(function(){
-		// dynamically create divs for question and answers
-		var questionDiv = $("<div>");
-		questionDiv.attr("id","questionDiv");
-		// hide the stuff inside the jumbotron I don't want to show
-		$("p, hr, div.row").css("display", "none");
-		// generate question and place inside div created above
-		game.generateQuestion();
-		questionDiv.text(game.currentQuestion);
-		// generate place for timer
-		var timer = $("<div>");
-		timer.attr("id","timer");
-		timer.addClass("text-center");
-		timer.text("Time left: 45 seconds")
-		$("div.jumbotron").append(timer);
-		// append questions below timer
-		$("div.jumbotron").append(questionDiv);
-		// append answers in random order to questionDiv just created
-		game.generateAnswers();
-		// create timer div and 
-		if(!game.clickRecording){
-			game.interval = setInterval(game.countDown,1000);
-		}
-	})
-	// record users click to check for if correct or incorrect answer chosen
-	$(window).click(function(event){
-		if(!game.clickRecording){
-			console.log(game.clickRecording);
-			game.click = event.target.innerHTML;
-			// if correct answer chosen increase correct counter by 1 and show postAnswer screen stuff 
-			if(game.click === game.correctAns){
-				$(".answerDiv").css("display", "none");
-				var postAnswer = $("<div>");
-				postAnswer.addClass("postAnswer");
-				postAnswer.addClass("text-center");
-				postAnswer.html("<p>correct!</p>")
-				$("#questionDiv").append(postAnswer);
-				game.correct++;
-				clearInterval(game.interval);
-				console.log("correct!");
-				game.clickRecording = true;
-				game.postQuestionScreen();
-			} else if(game.click === game.incorrect1 || game.click === game.incorrect2 || game.click === game.incorrect3){
-				$(".answerDiv").css("display", "none");
-				var postAnswer = $("<div>");
-				postAnswer.addClass("postAnswer");
-				postAnswer.addClass("text-center");
-				postAnswer.html("<p>wrong!</p>")
-				$("#questionDiv").append(postAnswer);
-				clearInterval(game.interval);
-				game.incorrect++;
-				game.clickRecording = true;
-				game.postQuestionScreen();
-			}
-		}
-	})
 }
+
+$("#start").click(function(){
+	// dynamically create divs for question and answers
+	var questionDiv = $("<div>");
+	questionDiv.attr("id","questionDiv");
+	// hide the stuff inside the jumbotron I don't want to show
+	$("p, hr, div.row").css("display", "none");
+	// generate question and place inside div created above
+	game.generateQuestion();
+	questionDiv.text(game.currentQuestion);
+	// generate place for timer
+	var timer = $("<div>");
+	timer.attr("id","timer");
+	timer.addClass("text-center");
+	timer.text("Time left: 45 seconds")
+	$("div.jumbotron").append(timer);
+	// append questions below timer
+	$("div.jumbotron").append(questionDiv);
+	// append answers in random order to questionDiv just created
+	game.generateAnswers();
+	// create timer div and 
+	if(!game.clickRecording){
+		game.interval = setInterval(game.countDown,1000);
+	}
+})
+// record users click to check for if correct or incorrect answer chosen
+$(window).click(function(event){
+	if(!game.clickRecording){
+		console.log(game.clickRecording);
+		game.click = event.target.innerHTML;
+		$(".answerDiv").hover(function(){
+			$(this).addClass("answerHover");
+		},function(){
+			$(this).removeClass("answerHover");
+		});
+		// if correct answer chosen increase correct counter by 1 and show postAnswer screen stuff 
+		if(game.click === game.correctAns){
+			$(".answerDiv").css("display", "none");
+			var postAnswer = $("<div>");
+			postAnswer.addClass("postAnswer");
+			postAnswer.addClass("text-center");
+			postAnswer.html("<p>correct!</p>")
+			$("#questionDiv").append(postAnswer);
+			game.correct++;
+			clearInterval(game.interval);
+			console.log("correct!");
+			game.clickRecording = true;
+			game.postQuestionScreen();
+		// if incorrect answer is chosen increase incorrect counter by 1 and show postAnswer screen
+		} else if(game.click === game.incorrect1 || game.click === game.incorrect2 || game.click === game.incorrect3){
+			$(".answerDiv").css("display", "none");
+			var postAnswer = $("<div>");
+			postAnswer.addClass("postAnswer");
+			postAnswer.addClass("text-center");
+			postAnswer.html("<p>I'm sorry that's incorrect. The correct answer is " + game.correctAns + "</p>")
+			$("#questionDiv").append(postAnswer);
+			clearInterval(game.interval);
+			game.incorrect++;
+			game.clickRecording = true;
+			game.postQuestionScreen();
+		} 
+	}
+})
+}
+
+
 
