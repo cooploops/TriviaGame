@@ -2,8 +2,19 @@ body {
 	background: url("../images/lightBackground.jpg");
 }
 
+h4 {
+	font-family: 'Rock Salt', cursive;
+	line-height: 200%;
+}
+
+hr {
+	color: white;
+}
+
 .jumbotron {
 	margin-top: 2em;
+	background-color: rgba(0,0,0, 0.73);
+	color: white;
 }
 
 #questionDiv {
@@ -20,16 +31,29 @@ body {
 }
 
 .answerHover {
-	border: 1px solid black;
+	border: 1px solid white;
 }
 
 .postAnswer {
 	margin-top: 2em;
-	font-size:20px;
+	font-size: 30px;
 	font-family: 'Quicksand', sans-serif;
+}
+
+.answerImage {
+	display: block;
+	margin: auto;
+	width: 40%;
+	border: 2px solid white;
+	border-radius: 5px;
+
 }
 
 #timer {
 	margin-top: 2em;
 	font-size: 30px;
+}
+
+#endScore {
+	font-family: 'Rock Salt', cursive;;
 }
