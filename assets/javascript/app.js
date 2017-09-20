@@ -5,7 +5,7 @@ var game = {
 	incorrect: 0,
 	questionTimer: 45,
 	postAnswerTimeOut: 10000,
-	gameImage: "",
+	currentImage: "",
 	currentQuestion: "",
 	correctAns: "",
 	incorrect1: "",
@@ -40,7 +40,7 @@ var game = {
 			ques: "Why are black holes called black holes?",
 			wrongans1: "because they're black in color",
 			wrongans2: "because everything they suck in just mixes up into 'black' matter",
-			wrongans3: "because it sounds cool and less threatening that 'end-of-reality' hole",
+			wrongans3: "because it sounds cool and less threatening than 'end-of-reality' hole",
 			rightans: "they're actually the brightest objects in space but their light never reaches our eyes because of their own immense gravity, which makes them appear as black spots in the sky",
 			image: "assets/images/blackHoleDiagram.jpg"
 		},
@@ -111,7 +111,7 @@ var game = {
 			this.incorrect1 = game.questions[Index].wrongans1;
 			this.incorrect2 = game.questions[Index].wrongans2;
 			this.incorrect3 = game.questions[Index].wrongans3;
-			this.gameImage = game.questions[Index].image;
+			this.currentImage = game.questions[Index].image;
 			this.possAns = [game.correctAns, game.incorrect1, game.incorrect2, game.incorrect3];
 			game.possAnsLength = this.possAns.length;
 			this.questionsUsed.push(this.questions.splice(Index,1));
@@ -154,7 +154,18 @@ var game = {
 		},
 
 		postQuestionScreen: function() {
-			// set delay before changing screen
+			// dynamically create post answer screen with answer and image and then set delay before reset for next question
+			$(".answerDiv").css("display", "none");
+			var postAnswer = $("<div>");
+			var postAnswerImage = $("<img>");
+			postAnswer.addClass("postAnswer");
+			postAnswer.addClass("text-center");
+			postAnswerImage.attr("src", game.currentImage);
+			postAnswerImage.addClass("answerImage");
+			$("#questionDiv").append(postAnswer);
+			$("#questionDiv").append(postAnswerImage);
+			clearInterval(game.interval);
+			game.clickRecording = true;
 			setTimeout(function(){
 				game.clickRecording = false;
 				game.reset();
@@ -213,37 +224,17 @@ $(window).click(function(event){
 		game.click = event.target.innerHTML;
 		// if correct answer chosen increase correct counter by 1 and show postAnswer screen stuff 
 		if(game.click === game.correctAns){
-			$(".answerDiv").css("display", "none");
-			var postAnswer = $("<div>");
-			var postAnswerImage = $("<img>");
-			postAnswer.addClass("postAnswer");
-			postAnswer.addClass("text-center");
-			postAnswer.html("<p>Correct!</p>");
-			postAnswerImage.attr("src", game.gameImage);
-			postAnswerImage.addClass("answerImage");
-			$("#questionDiv").append(postAnswer);
-			$("#questionDiv").append(postAnswerImage);
 			game.correct++;
-			clearInterval(game.interval);
 			console.log("correct!");
-			game.clickRecording = true;
 			game.postQuestionScreen();
+			$("div.postAnswer").html("<p>Correct!</p>")
+			// postAnswer.html("<p>Correct!</p>");
 		// if incorrect answer is chosen increase incorrect counter by 1 and show postAnswer screen
 		} else if(game.click === game.incorrect1 || game.click === game.incorrect2 || game.click === game.incorrect3){
-			$(".answerDiv").css("display", "none");
-			var postAnswer = $("<div>");
-			var postAnswerImage = $("<img>");
-			postAnswer.addClass("postAnswer");
-			postAnswer.addClass("text-center");
-			postAnswer.html("<p>I'm sorry that's incorrect. The correct answer is " + game.correctAns + "</p>")
-			postAnswerImage.attr("src", game.gameImage);
-			postAnswerImage.addClass("answerImage");
-			$("#questionDiv").append(postAnswer);
-			$("#questionDiv").append(postAnswerImage);
-			clearInterval(game.interval);
 			game.incorrect++;
-			game.clickRecording = true;
+			console.log("incorrect!")
 			game.postQuestionScreen();
+			$("div.postAnswer").html("<p>I'm sorry that's incorrect. The correct answer is " + game.correctAns + "</p>")
 		} 
 	}
 })
